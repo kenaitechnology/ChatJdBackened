@@ -36,4 +36,4 @@ startServer();
 
 setInterval(() => {
   console.log(`[Keep-Alive] Server is running at ${new Date().toLocaleTimeString()}`);
-}, 5 * 60 * 1000);
+}, 60 * 1000);
