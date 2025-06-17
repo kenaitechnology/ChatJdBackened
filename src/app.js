@@ -4,6 +4,7 @@ import bodyParser from "body-parser";
 import dotenv from "dotenv";
 import routes from "./routes/askRoutes.js";
 import db from "./config/db.js";
+import cron from "node-cron";
 
 dotenv.config();
 const app = express();
@@ -18,22 +19,30 @@ app.get('/ping', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 
-async function startServer() {
+cron.schedule("*/1 * * * *", async () => {
+  const url = "https://chatbot-bgq3.onrender.com/ping";
+  console.log(`[CRON] Self-ping at ${new Date().toLocaleTimeString()}`);
+
+  try {
+    const response = await fetch(url);
+    if (response.ok) {
+      console.log("✅ Self-ping successful.");
+    } else {
+      console.error("⚠️ Self-ping failed with status:", response.status);
+    }
+  } catch (error) {
+    console.error("❌ Self-ping error:", error.message);
+  }
+});
+
+
+app.listen(PORT, async () => {
   try {
     await db.query("SELECT 1");
     console.log("✅ Connected to the database successfully.");
-
-    app.listen(PORT, () => {
-      console.log(`🚀 Server is running on port ${PORT}`);
-    });
+    console.log(`🚀 Server is running on port ${PORT}`);
   } catch (error) {
     console.error("❌ Failed to connect to the database:", error.message);
     process.exit(1);
   }
-}
-
-startServer();
-
-setInterval(() => {
-  console.log(`[Keep-Alive] Server is running at ${new Date().toLocaleTimeString()}`);
-}, 60 * 1000);
+});
