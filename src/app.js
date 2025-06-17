@@ -13,15 +13,17 @@ app.use(cors({ origin: "*" }));
 app.use(bodyParser.json());
 app.use("/api", routes);
 
-app.get('/ping', (req, res) => {
-  res.status(200).send('pong');
+app.get("/ping", (req, res) => {
+  const timestamp = new Date().toISOString();
+  console.log(`[PING] Received ping at ${timestamp}`);
+  res.status(200).send("pong");
 });
 
 const PORT = process.env.PORT || 3000;
 
 cron.schedule("*/1 * * * *", async () => {
-  const url = "https://chatbot-bgq3.onrender.com/ping";
-  console.log(`[CRON] Self-ping at ${new Date().toLocaleTimeString()}`);
+  const url = process.env.PING_URL
+  console.log(`[CRON] Attempting self-ping at ${new Date().toISOString()}`);
 
   try {
     const response = await fetch(url);
